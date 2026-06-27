@@ -6,7 +6,6 @@
 - **Name**: azure-ai-pantheon
 - **Tagline**: AI Agent orchestration
 - **Repo**: https://github.com/clgintellicloud-hub/azure-ai-pantheon.git
-- **Workspace Path**: `C:\Users\openclaw\Documents\grok`
 - **Purpose**: Build a management and orchestration layer ("Pantheon") for multiple AI agents — specifically **Hermes Agent** and **OpenClaw** — running as containerized workloads inside **Azure Container Apps (ACA)**, with **Microsoft Agent Framework (MAF)** as a primary orchestration technology.
 
 ## Core Objective
@@ -22,21 +21,19 @@ Create a system that can:
 - Active development workspace is this folder.
 
 ## Critical Related Codebases (Prior Work)
-These contain existing patterns the Pantheon should build upon or evolve:
+These contain existing patterns the Pantheon should build upon or evolve. Full source for prior work lives in the related sibling projects `azure-hermes-factory` and `oc-agent-main`.
 
-1. **Azure Hermes Factory**  
-   Path: `C:\Users\openclaw\Documents\claude-code\azure-hermes-factory\`  
-   - Bicep-based IaC for ACA (dev + prod resource groups)  
-   - ACR, Container Apps Environment, multiple agents  
-   - Dockerized wrappers for Hermes + "analyst" + generic OpenClaw-style agents  
-   - Uses Node.js HTTP shim that spawns the real `hermes-agent` CLI  
-   - Scripts for build, revisions, rollback, smoke tests
+See:
+- `docs/EXISTING_FACTORIES_ANALYSIS.md` — Detailed comparison and implications
+- `docs/KNOWN_PRIOR_WORK.md` — Summary of patterns from those projects
 
-2. **OC Agent Main**  
-   Path: `C:\Users\openclaw\Downloads\oc-agent-main\oc-agent-main\`  
-   - Very similar structure to the above, more OpenClaw-focused configs
+Key patterns observed:
+- Bicep-based IaC for ACA (dev + prod)
+- ACR + Log Analytics + Container Apps
+- Dockerized wrappers that spawn the real Hermes/OpenClaw agent CLI
+- Scripts for revisions, rollback, and smoke tests
 
-These two should be studied when designing the Pantheon layer.
+These should be studied when designing the Pantheon layer.
 
 ## Key Technologies
 - **Microsoft Agent Framework (MAF)** — Primary framework for the orchestration layer (Python and/or .NET). Unifies concepts from Semantic Kernel + AutoGen. Supports workflows, agents, middleware, sessions, MCP, strong telemetry.
@@ -48,21 +45,24 @@ These two should be studied when designing the Pantheon layer.
 - **Microsoft Foundry** — Likely target for observability and higher-level agent features.
 - GitHub CLI (`gh`) — Already authenticated as `clgintellicloud-hub`.
 
-## Architecture Direction (Early Thinking)
-- Lower layer: Existing containerized Hermes and OpenClaw instances on ACA (from the factories).
-- Orchestration layer: MAF agents/workflows that can discover, invoke, route to, monitor, and compose the above agents.
-- Possible patterns:
-  - MAF as supervisor / router
-  - Hermes/OpenClaw exposed via HTTP or MCP and treated as tools or sub-agents
-  - Unified control plane for versioning, scaling, A/B testing (leveraging ACA revisions)
-  - Strong observability (OTel → Application Insights → Foundry)
+## Architecture Direction (Guiding Document)
+Follow the full recommended architecture:
+- **[docs/architecture.md](docs/architecture.md)** — Production Azure stack (ACA primary runtime, Microsoft Foundry, Cosmos DB for state, ACR, Key Vault + Managed Identity, App Insights).
+- High-level flow: User/Trigger → MAF Orchestrator (ACA) → calls Hermes/OpenClaw agents (in their own ACA containers) → state in Cosmos + MAF checkpoints → full OTel traces in Foundry.
+- Repository structure: Strict separation of `infra/` (Bicep) and `src/` (MAF code) with path-filtered GitHub Actions for controllable deployments.
+- See also: `docs/EXISTING_FACTORIES_ANALYSIS.md` for analysis of prior work this architecture builds upon.
+
+Key implementation goals:
+- MAF workflows for orchestration, handoff, and tool calling to existing agents.
+- Expose Hermes/OpenClaw as MAF tools or via standardized endpoints (HTTP/MCP).
+- Use ACA revisions + Compose for Agents (preview) where appropriate.
 
 ## How to Resume Work After Reboot or New Session
 When you (Grok or another agent) start fresh:
 
 1. Change to the project directory:
    ```powershell
-   cd "C:\Users\openclaw\Documents\grok"
+   cd <project-root>
    ```
 
 2. **Read the following files first** (in this order):
@@ -77,8 +77,8 @@ When you (Grok or another agent) start fresh:
    ```
 
 4. Review prior work (very important):
-   - List and read key files from `..\claude-code\azure-hermes-factory\`
-   - Review the `oc-agent-main` folder
+   - Read `docs/EXISTING_FACTORIES_ANALYSIS.md` and `docs/KNOWN_PRIOR_WORK.md`
+   - These describe patterns from the related `azure-hermes-factory` and `oc-agent-main` projects
 
 5. Ask the user or review recent commits for the latest task.
 
@@ -98,6 +98,21 @@ When you (Grok or another agent) start fresh:
 - Commit context files early and often (`AGENTS.md`, `docs/*.md`).
 - Use clear, self-contained Markdown so a fresh session can understand the project without the full chat history.
 - When making progress, summarize changes back into `docs/STATUS.md` or this file.
+
+## Security Guidelines for AI Assistants
+
+This repository follows strict security rules (see `docs/security-guidelines.md`).
+
+When generating or modifying code, workflows, or IaC:
+
+- **Never** output real credentials, tokens, example secret values, or personal information.
+- Always reference secrets using `${{ secrets.NAME }}` (GitHub Actions) or environment variables.
+- For Azure: Prefer and generate **OIDC-based authentication** using the `azure/login` action with `client-id` / `tenant-id` from `vars` (not secrets).
+- When creating new files, recommend appropriate additions to `.gitignore`.
+- Add security comments in generated code (e.g. `# Store value in GitHub Secrets as AZURE_CLIENT_ID`).
+- For Bicep/infra: Use parameters. Never hardcode connection strings or keys.
+- For local development instructions: Always tell the user to use gitignored `.env` files.
+- Follow all rules in `docs/security-guidelines.md` and `SECURITY.md`.
 
 ## Routine Context Saving Protocol (Critical for No Data Loss)
 
@@ -120,7 +135,7 @@ Save context **routinely** at these points:
 ### 3. How to Save (The Method)
 **Preferred method (agent or human):**
 ```powershell
-cd "C:\Users\openclaw\Documents\grok"
+cd <project-root>
 powershell -ExecutionPolicy Bypass -File .\scripts\save-context.ps1 `
   -Summary "Summarized what was just accomplished" `
   -FocusArea "MAF research / Hermes factory analysis" `
@@ -175,7 +190,7 @@ Following this protocol means that even if the entire conversation history disap
 Use the provided helper script (recommended):
 
 ```powershell
-cd "C:\Users\openclaw\Documents\grok"
+cd <project-root>
 .\scripts\create-grok-branch.ps1 add-maf-orchestrator
 # or with bypass if needed:
 powershell -ExecutionPolicy Bypass -File .\scripts\create-grok-branch.ps1 "your-feature-name"

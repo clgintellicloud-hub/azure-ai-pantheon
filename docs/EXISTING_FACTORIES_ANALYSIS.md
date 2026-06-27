@@ -8,8 +8,8 @@
 
 We have two closely related but distinct codebases that deploy Hermes Agent and OpenClaw-style agents to Azure Container Apps:
 
-1. **azure-hermes-factory** (`~/Documents/claude-code/azure-hermes-factory/`)
-2. **oc-agent-main** (`~/Downloads/oc-agent-main/oc-agent-main/`)
+1. **azure-hermes-factory** (prior Bicep and container deployment project)
+2. **oc-agent-main** (prior OpenClaw-focused deployment project)
 
 Both solve the same core problem: packaging autonomous agents (Hermes / OpenClaw) as containerized workloads on ACA with proper IaC, multi-environment support, and operational tooling.
 

@@ -1,0 +1,14 @@
+# MAF Orchestrator dependencies
+fastapi
+uvicorn[standard]
+azure-identity
+azure-cosmos
+# Microsoft Agent Framework
+agent-framework
+# OpenTelemetry
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+# For calling existing agents
+httpx
+pydantic

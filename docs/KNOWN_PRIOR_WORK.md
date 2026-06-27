@@ -3,9 +3,10 @@
 This document captures external codebases that form the foundation for azure-ai-pantheon.
 
 ## 1. Azure Hermes Factory
-**Location**: `C:\Users\openclaw\Documents\claude-code\azure-hermes-factory\`
 
 **Purpose**: Production-ready Bicep IaC + container definitions for running Hermes AI Agents on Azure Container Apps.
+
+**Note**: Full source resides in the related sibling repository `azure-hermes-factory`. See `docs/EXISTING_FACTORIES_ANALYSIS.md` for detailed analysis.
 
 **Key Components**:
 - `infra/bicep/` — Subscription-scoped deployment
@@ -29,9 +30,10 @@ This document captures external codebases that form the foundation for azure-ai-
 - Wrapper approach to run the official Hermes CLI inside containers
 
 ## 2. OC Agent Main
-**Location**: `C:\Users\openclaw\Downloads\oc-agent-main\oc-agent-main\`
 
-Similar structure, with more emphasis on OpenClaw configuration (`openclaw.json`).
+Similar structure to Azure Hermes Factory, with more emphasis on OpenClaw configuration (`openclaw.json`).
+
+**Note**: Full source resides in the related sibling repository `oc-agent-main`. See `docs/EXISTING_FACTORIES_ANALYSIS.md` for detailed analysis.
 
 ## Why This Matters for Pantheon
 The Pantheon (this repo) should not re-invent the container deployment wheel. Instead it should:
@@ -39,4 +41,4 @@ The Pantheon (this repo) should not re-invent the container deployment wheel. In
 - Provide the intelligence layer (MAF-based) on top.
 - Offer unified control, routing, and observability across Hermes and OpenClaw instances.
 
-When resuming work, always inspect recent changes in these two locations.
+When resuming work, always review `docs/EXISTING_FACTORIES_ANALYSIS.md` and `docs/KNOWN_PRIOR_WORK.md` (which summarize patterns from these external projects).

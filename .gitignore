@@ -1,0 +1,44 @@
+# Secrets & Environment
+.env
+.env.local
+.envrc
+
+# Allow example files (safe to commit)
+!.env.example
+!.env.*.example
+
+# Local development / IDE
+.vscode/
+.idea/
+*.code-workspace
+local.settings.json
+appsettings.Development.json
+
+# Azure / azd local state
+.azure/
+azd/
+**/*-local.json
+**/*-dev.json
+**/*-prod.json
+
+# Keys and certificates
+*.pem
+*.key
+*.crt
+*.pfx
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / others (if applicable)
+node_modules/
+
+# General
+*.log
+.DS_Store
+Thumbs.db

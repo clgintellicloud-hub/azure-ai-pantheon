@@ -1,0 +1,31 @@
+# Local Docker Compose mirroring the production MAF orchestration architecture
+# Run with: docker compose up --build
+#
+# SECURITY: Never put real credentials in this file.
+# Use .env (gitignored) with variable substitution or external secrets.
+
+services:
+  maf-orchestrator:
+    build: ./src/maf-orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT}
+      - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT}
+    depends_on:
+      - hermes-agent
+      - openclaw-agent
+
+  hermes-agent:
+    build: ./agents/hermes-agent
+    ports:
+      - "8081:8080"
+    environment:
+      - AGENT_NAME=hermes
+
+  openclaw-agent:
+    build: ./agents/openclaw-agent
+    ports:
+      - "8082:8080"
+    environment:
+      - AGENT_NAME=openclaw

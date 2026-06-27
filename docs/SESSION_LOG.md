@@ -76,6 +76,23 @@ Format:
 - Deepen the factory analysis (Bicep modules, workflows, wrappers)
 - Identify MAF integration points
 
+## 2026-06-27 — Architecture implementation on `grok/azure-maf-architecture`
+**Focus**: azure-maf-architecture
+**Key Changes**:
+- Created branch and scaffolded the complete recommended architecture
+- Added comprehensive docs/architecture.md
+- Implemented full folder structure (infra/, src/maf-orchestrator/, agents/, .github/workflows/)
+- Added key stubs: main.bicep, container-app module, FastAPI orchestrator, compose.yaml, azd.yaml, workflow files
+- Updated project docs (README, AGENTS, LIVE_STATE) to adopt the architecture
+**Context Saved To**:
+- docs/architecture.md (primary)
+- docs/LIVE_STATE.md + SESSION_LOG.md
+- All new files committed on feature branch
+**Next Steps**:
+- Flesh out more Bicep modules and MAF workflow code
+- Align with existing factories analysis
+- Consider pushing and creating PR
+
 ## (New sessions will append here)
 
 ## 2026-06-27 14:27 — Routine saving reliability

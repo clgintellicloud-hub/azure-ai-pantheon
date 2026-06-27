@@ -1,0 +1,42 @@
+name: Deploy MAF Orchestrator
+
+# Security: Follow guidelines in docs/security-guidelines.md
+# - OIDC preferred
+# - Use vars for Azure identity
+# - Minimal permissions declared
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/maf-orchestrator/**'
+    branches: [ main, 'grok/**' ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Use pinned SHAs in production (example below)
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Azure Login (OIDC - Recommended)
+        # client-id, tenant-id, subscription-id should be GitHub Variables (vars), not secrets
+        uses: azure/login@14a755a4e2d7e2b02b31e8a1c6d8e1d7f9f8e0a1 # v2 (pin to SHA)
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push orchestrator image
+        run: |
+          echo "Build maf-orchestrator image and push to ACR"
+          # Never echo secrets. Use --output none or proper masking if needed.
+
+      - name: Deploy to ACA
+        run: |
+          echo "Update Container App revision for maf-orchestrator"
+          # Pass secrets only via GitHub secrets/vars or Key Vault references at runtime.
