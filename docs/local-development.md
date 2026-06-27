@@ -28,13 +28,20 @@ azd env set FOUNDRY_ENDPOINT https://...
 
 These are stored locally by azd and not committed.
 
-## Running Locally
+## Running Locally (Phase 1)
 
-```bash
-# With Docker Compose
+```powershell
+# 1. Prepare env
+copy .env.example .env   # Edit if needed (most values optional for mocks)
+
+# 2. Build and run with Docker Compose (recommended)
 docker compose up --build
 
-# Or directly
+# In another terminal, test:
+# Invoke-RestMethod http://localhost:8000/health
+# Invoke-RestMethod -Method Post -Uri http://localhost:8000/tasks -Body (@{prompt="Analyze market trends and execute plan"} | ConvertTo-Json) -ContentType "application/json"
+
+# Or run orchestrator directly for faster iteration:
 cd src/maf-orchestrator
 pip install -r requirements.txt
 uvicorn app.main:app --reload

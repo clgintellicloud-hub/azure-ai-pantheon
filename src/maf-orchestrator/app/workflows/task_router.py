@@ -47,25 +47,43 @@ openclaw_agent = Agent(
 
 async def run_simple_workflow(prompt: str) -> dict[str, Any]:
     """
-    Minimal MAF-style workflow.
-    In a full implementation this would use Workflow graph with planning/handoff.
-    For Phase 1 we demonstrate tool calling + routing.
+    MAF-style orchestrator workflow for Phase 1.
+    1. Planning step (simple rule-based for now, can be replaced by LLM planner)
+    2. Route to appropriate agent(s) using MAF Agents + tools
     """
-    # Simple routing logic (will be replaced by real MAF Workflow later)
-    use_hermes = any(kw in prompt.lower() for kw in ["analyze", "complex", "plan", "research"])
-    
-    results = []
-    
+    # --- Planning step ---
+    # In full MAF this would be an LLM-powered planner agent.
+    # For now, use simple heuristics to demonstrate workflow.
+    prompt_lower = prompt.lower()
+    use_hermes = any(kw in prompt_lower for kw in ["analyze", "complex", "plan", "research", "strategy"])
+    use_openclaw = True  # OpenClaw is general purpose
+
+    plan = {
+        "task": prompt,
+        "steps": [],
+        "agents_to_use": []
+    }
+
     if use_hermes:
-        result = await hermes_agent.run(prompt)
-        results.append({"agent": "hermes", "output": result})
-    
-    # Always give OpenClaw a chance (or based on plan)
-    result = await openclaw_agent.run(prompt)
-    results.append({"agent": "openclaw", "output": result})
-    
+        plan["steps"].append("Use Hermes for deep analysis/self-improvement")
+        plan["agents_to_use"].append("hermes")
+    if use_openclaw:
+        plan["steps"].append("Use OpenClaw for execution/personal actions")
+        plan["agents_to_use"].append("openclaw")
+
+    # --- Execution step using MAF Agents ---
+    results = []
+
+    if use_hermes:
+        hermes_result = await hermes_agent.run(prompt)
+        results.append({"agent": "hermes", "output": hermes_result})
+
+    if use_openclaw:
+        openclaw_result = await openclaw_agent.run(prompt)
+        results.append({"agent": "openclaw", "output": openclaw_result})
+
     return {
-        "plan": "routed via MAF orchestrator",
+        "plan": plan,
         "results": results,
-        "summary": "Task processed by selected agents using MAF tools."
+        "summary": "Task decomposed and routed using MAF workflow + tools."
     }
