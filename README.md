@@ -38,6 +38,11 @@ Key stack:
 ## Current Status
 See `AGENTS.md` and files in `docs/`.
 
+**Phase 1 in progress** (on `grok/next-steps-orchestrator`):
+- Minimal MAF orchestrator + workflow running locally via `docker compose up`
+- Mock Hermes & OpenClaw agents for development
+- See docs/local-development.md for how to test.
+
 ## Related Work
 This repo is the orchestration layer on top of earlier infrastructure work in the related `azure-hermes-factory` and `oc-agent-main` projects (sibling repositories with prior Bicep IaC and agent container definitions). 
 
