@@ -12,25 +12,24 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-- Establishing a reliable, routine process for saving project memory so almost nothing is lost after reboots.
-- The "Routine Context Saving Protocol" has been designed and implemented.
+**Branch**: `grok/analyze-existing-factories`
+
+- Performing initial analysis of the two existing agent deployment factories (azure-hermes-factory and oc-agent-main).
+- Documenting common patterns, differences, and implications for the future MAF-based Pantheon orchestration layer.
+- Created `docs/EXISTING_FACTORIES_ANALYSIS.md` as the first real artifact on this feature branch.
 
 ## Last Major Accomplishments
-- 2026-06-27: Cloned the repo.
-- 2026-06-27: Designed + implemented reliable **Routine Context Saving Protocol**:
-  - `docs/LIVE_STATE.md` — always-current "what's happening now" (agent maintains with search_replace)
-  - `docs/SESSION_LOG.md` — append-only session history
-  - `scripts/save-context.ps1` — simple helper (run with -ExecutionPolicy Bypass)
-  - Full protocol documented in AGENTS.md
-  - `docs/TODOS.md` for persistent tasks
-  - Committed to git (multiple commits)
+- 2026-06-27: Cloned the repo + set up context & branching infrastructure.
+- 2026-06-27: Created first real feature branch: `grok/analyze-existing-factories`
+- Created initial analysis document: `docs/EXISTING_FACTORIES_ANALYSIS.md` covering the two prior factories and Pantheon implications.
+- Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Study the existing `azure-hermes-factory` and `oc-agent-main` implementations in detail.
-2. Research current MAF patterns for multi-agent orchestration and ACA deployment.
-3. Propose high-level architecture for the Pantheon conductor.
-4. Decide on implementation language for MAF layer (Python vs .NET/C#).
-5. (Routine) After any meaningful progress, update LIVE_STATE.md + SESSION_LOG.md and commit.
+1. Continue deep dive on this branch: Bicep modules, GitHub Actions workflows, agent variants.
+2. Identify concrete extension points for MAF orchestration (HTTP, health, config).
+3. Research current MAF patterns for multi-agent orchestration and ACA deployment.
+4. Propose high-level architecture for the Pantheon conductor (in a follow-up document or PR).
+5. (Routine) Use save-context discipline after progress.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)
