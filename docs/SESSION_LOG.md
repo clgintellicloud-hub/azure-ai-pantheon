@@ -62,3 +62,7 @@ Format:
 - Move on to analyzing existing factories and MAF research
 
 ## (New sessions will append here)
+
+## 2026-06-27 14:27 — Routine saving reliability
+**Key Changes**: Simplified save script to minimal reliable version. Primary context updates now done directly by agent via file tools for robustness.
+**Saved**: docs/LIVE_STATE.md + this log (git staged)

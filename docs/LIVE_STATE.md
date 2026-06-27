@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-27 15:45 (Routine context saving system fully implemented)
+**Last Updated**: 2026-06-27 (Routine context saving protocol fully active and documented)
 
 ---
 
@@ -16,22 +16,21 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - The "Routine Context Saving Protocol" has been designed and implemented.
 
 ## Last Major Accomplishments
-- 2026-06-27: Cloned the repo into the project workspace.
-- 2026-06-27: Designed and implemented full **Routine Context Saving Protocol**:
-  - Created `docs/LIVE_STATE.md` (always-current snapshot)
-  - Created `docs/SESSION_LOG.md` (append-only history)
-  - Created `scripts/save-context.ps1` (easy routine saver)
-  - Updated `AGENTS.md` with detailed saving protocol
-  - Added `docs/TODOS.md` for persistent tasks
-  - Enhanced resume script
-  - Committed everything with good messages.
+- 2026-06-27: Cloned the repo.
+- 2026-06-27: Designed + implemented reliable **Routine Context Saving Protocol**:
+  - `docs/LIVE_STATE.md` — always-current "what's happening now" (agent maintains with search_replace)
+  - `docs/SESSION_LOG.md` — append-only session history
+  - `scripts/save-context.ps1` — simple helper (run with -ExecutionPolicy Bypass)
+  - Full protocol documented in AGENTS.md
+  - `docs/TODOS.md` for persistent tasks
+  - Committed to git (multiple commits)
 
 ## Next Immediate Steps
 1. Study the existing `azure-hermes-factory` and `oc-agent-main` implementations in detail.
 2. Research current MAF patterns for multi-agent orchestration and ACA deployment.
 3. Propose high-level architecture for the Pantheon conductor.
 4. Decide on implementation language for MAF layer (Python vs .NET/C#).
-5. (Ongoing) Use the new save-context routine after every meaningful piece of work.
+5. (Routine) After any meaningful progress, update LIVE_STATE.md + SESSION_LOG.md and commit.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)
