@@ -1,4 +1,8 @@
-# Local Docker Compose mirroring the production MAF orchestration architecture
+# Local Docker Compose for development
+# - Uses mock agents by default (for quick local testing)
+# - To use REAL deployed Hermes/OpenClaw, override the *_ENDPOINT in .env
+#   to point to your ACA instances (see .env.example)
+#
 # Run with: docker compose up --build
 #
 # SECURITY: Never put real credentials in this file.
@@ -10,8 +14,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT}
-      - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT}
+      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT:-}
+      - COSMOS_KEY=${COSMOS_KEY:-}
+      - COSMOS_DATABASE=${COSMOS_DATABASE:-pantheon}
+      - COSMOS_CONTAINER=${COSMOS_CONTAINER:-workflow_state}
+      - USE_COSMOS_STATE=${USE_COSMOS_STATE:-true}
+      - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT:-}
+      - HERMES_ENDPOINT=http://hermes-agent:8080
+      - OPENCLAW_ENDPOINT=http://openclaw-agent:8080
+    volumes:
+      - ./src/maf-orchestrator:/app  # Hot reload for development
     depends_on:
       - hermes-agent
       - openclaw-agent

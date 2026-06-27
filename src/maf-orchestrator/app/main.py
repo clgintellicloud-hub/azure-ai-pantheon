@@ -4,15 +4,79 @@
 # SECURITY: Load all secrets from environment variables only.
 # Never hardcode credentials. See docs/security-guidelines.md
 
+import asyncio
 from fastapi import FastAPI
+from pydantic import BaseModel
+
+import logging
+import os
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+from app.workflows.task_router import run_pantheon_workflow
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("maf-orchestrator")
+
+# Basic OpenTelemetry setup (Phase 1 - console for local, later export to App Insights)
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+
+tracer = trace.get_tracer(__name__)
 
 app = FastAPI(title="azure-ai-pantheon MAF Orchestrator")
 
+class TaskRequest(BaseModel):
+    prompt: str
+    metadata: dict = {}
+    checkpoint_id: str | None = None  # For resuming MAF workflow state from Cosmos
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "framework": "microsoft-agent-framework"}
+    return {
+        "status": "ok",
+        "framework": "microsoft-agent-framework",
+        "version": "phase1-minimal"
+    }
 
 @app.post("/orchestrate")
-async def orchestrate(task: dict):
-    # TODO: Implement MAF workflow that routes to Hermes / OpenClaw
-    return {"message": "Task received", "task": task}
+async def orchestrate(request: TaskRequest):
+    """Submit a task to the MAF orchestrator.
+    
+    Uses a proper MAF Workflow Graph:
+    - Planning step
+    - Conditional handoff to HermesAgent / OpenClawAgent / Both
+    - Basic success/failure handling
+    - Cosmos DB checkpointing for durable state (if configured)
+    """
+    with tracer.start_as_current_span("orchestrate_task"):
+        logger.info(f"Received task: {request.prompt[:100]}... (checkpoint={request.checkpoint_id})")
+        
+        result = await run_pantheon_workflow(
+            prompt=request.prompt, 
+            checkpoint_id=request.checkpoint_id
+        )
+        
+        # Extract agents from different result shapes
+        agents = []
+        exec_data = result.get("execution", {})
+        if isinstance(exec_data, dict) and "hermes" in exec_data:
+            agents = ["hermes", "openclaw"]
+        elif "agent" in exec_data:
+            agents = [exec_data["agent"]]
+        
+        logger.info(f"Workflow completed for task. Agents used: {agents}")
+        
+        return {
+            "status": "processed",
+            "input": request.prompt,
+            "checkpoint_id": result.get("checkpoint_id"),
+            "result": result
+        }
+
+@app.post("/tasks")
+async def submit_task(request: TaskRequest):
+    """Task submission endpoint (supports resume via checkpoint_id)."""
+    response = await orchestrate(request)
+    return {"task_id": response.get("checkpoint_id", "local-demo-001"), **response}
