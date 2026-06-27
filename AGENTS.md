@@ -5,7 +5,7 @@
 ## Project Identity
 - **Name**: azure-ai-pantheon
 - **Tagline**: AI Agent orchestration
-- **Repo**: https://github.com/clgintellicloud-hub/azure-ai-pantheon.git
+- **Repo**: https://github.com/clg-built4tech-azure/azure-ai-pantheon.git
 - **Purpose**: Build a management and orchestration layer ("Pantheon") for multiple AI agents — specifically **Hermes Agent** and **OpenClaw** — running as containerized workloads inside **Azure Container Apps (ACA)**, with **Microsoft Agent Framework (MAF)** as a primary orchestration technology.
 
 ## Core Objective
@@ -43,7 +43,7 @@ These should be studied when designing the Pantheon layer.
 - **Bicep** — Current IaC language.
 - **Docker** — For packaging agents.
 - **Microsoft Foundry** — Likely target for observability and higher-level agent features.
-- GitHub CLI (`gh`) — Already authenticated as `clgintellicloud-hub`.
+- GitHub CLI (`gh`) — Ensure `gh` is authenticated to your current account (`clg-built4tech-azure`).
 
 ## Architecture Direction (Guiding Document)
 Follow the full recommended architecture:
@@ -226,7 +226,7 @@ git branch -m old-name grok/old-name
 ```
 
 ## Contact / Ownership
-- GitHub account context: `clgintellicloud-hub`
+- GitHub account: `clg-built4tech-azure`
 - User frequently works with Hermes, OpenClaw, and Azure agent deployments.
 
 ---

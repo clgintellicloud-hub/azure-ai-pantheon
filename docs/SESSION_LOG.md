@@ -21,7 +21,7 @@ Format:
 **Focus**: Ensuring project memory survives computer reboots and new Grok sessions.
 
 **Key Changes**:
-- Cloned https://github.com/clgintellicloud-hub/azure-ai-pantheon.git into workspace.
+- Cloned https://github.com/clg-built4tech-azure/azure-ai-pantheon.git into workspace.
 - Created AGENTS.md with full project identity, related code locations, and resume instructions.
 - Created docs/ structure: STATUS.md, KNOWN_PRIOR_WORK.md, DECISIONS.md, LIVE_STATE.md.
 - Created scripts/resume-context.ps1 and scripts/save-context.ps1.

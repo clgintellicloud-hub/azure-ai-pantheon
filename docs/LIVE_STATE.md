@@ -46,7 +46,7 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 
 ## Key Facts That Must Not Be Lost
 - Project root is the root of this repository.
-- GitHub user/org: clgintellicloud-hub
+- GitHub user/org: clg-built4tech-azure
 - Existing agent deployments use Node.js wrappers around `hermes-agent` CLI inside ACA containers.
 - gh CLI is already authenticated with repo scope.
 - Strong preference for filesystem-based context that survives reboots.
