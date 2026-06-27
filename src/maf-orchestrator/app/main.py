@@ -23,6 +23,8 @@ logger = logging.getLogger("maf-orchestrator")
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
 
+tracer = trace.get_tracer(__name__)
+
 app = FastAPI(title="azure-ai-pantheon MAF Orchestrator")
 
 class TaskRequest(BaseModel):
@@ -51,7 +53,14 @@ async def orchestrate(request: TaskRequest):
         
         result = await run_pantheon_workflow(request.prompt)
         
-        logger.info(f"Workflow completed for task. Agents used: {[r['agent'] for r in result.get('results', [])]}")
+        # Extract agents from different result shapes
+        agents = []
+        if "execution" in result:
+            if isinstance(result["execution"], dict) and "hermes" in result["execution"]:
+                agents = ["hermes", "openclaw"]
+            elif "agent" in result.get("execution", {}):
+                agents = [result["execution"]["agent"]]
+        logger.info(f"Workflow completed for task. Agents used: {agents}")
         
         return {
             "status": "processed",
