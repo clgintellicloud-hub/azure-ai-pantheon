@@ -5,16 +5,19 @@ It can be updated by the agent (via tools) or the user.
 
 Use simple markdown checkboxes. Move completed items to a "Done" section or delete them.
 
-## Current / Active
-- [x] Deep-dive into existing `azure-hermes-factory` Bicep and Docker code (see docs/EXISTING_FACTORIES_ANALYSIS.md)
-- [x] Research and adopt recommended Azure MAF architecture (docs/architecture.md)
-- [x] Scaffold full project structure + Bicep + MAF stubs (on branch `grok/azure-maf-architecture`)
-- [ ] Flesh out remaining Bicep modules (cosmos-db, key-vault, monitoring, foundry)
-- [ ] Implement initial MAF orchestrator workflows that call Hermes/OpenClaw (as tools or HTTP)
-- [ ] Add full OpenTelemetry + Foundry tracing to orchestrator
+## Current / Active (grok/next-steps-orchestrator branch)
+- [x] Create branch grok/next-steps-orchestrator
+- [x] Create minimal working mock Hermes + OpenClaw agents (for local compose)
+- [x] Update compose.yaml for hot reload
+- [ ] Flesh out src/maf-orchestrator/ into a working FastAPI + MAF app
+- [x] Add MAF dependency + minimal working example (Agent + simple workflow)
+- [x] Implement basic task submission endpoint (POST /tasks)
+- [ ] Add health check + basic logging + OpenTelemetry setup
+- [ ] Flesh out remaining Bicep modules (monitoring, foundry, etc.)
+- [ ] Wire real integration points to Hermes and OpenClaw
+- [ ] Add Cosmos DB for state in infrastructure + orchestrator
+- [ ] Upgrade GitHub Actions workflows to use OIDC properly
 - [ ] Decide on primary language for MAF (Python strongly recommended)
-- [ ] Create more agent-specific container stubs or link to existing factories
-- [ ] Add complete GitHub Actions (ci, deploy-all, reusable workflows)
 
 ## Backlog
 - Improve container wrappers for better health, observability, and MCP exposure

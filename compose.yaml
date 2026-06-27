@@ -10,8 +10,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT}
-      - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT}
+      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT:-}
+      - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT:-}
+      - HERMES_ENDPOINT=http://hermes-agent:8080
+      - OPENCLAW_ENDPOINT=http://openclaw-agent:8080
+    volumes:
+      - ./src/maf-orchestrator:/app  # Hot reload for development
     depends_on:
       - hermes-agent
       - openclaw-agent

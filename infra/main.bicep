@@ -51,7 +51,7 @@ module cosmos 'modules/cosmos-db.bicep' = {
   }
 }
 
-// Key Vault
+// Key Vault (for secrets - accessed via Managed Identity)
 module kv 'modules/key-vault.bicep' = {
   name: 'keyVault'
   scope: rg
@@ -70,7 +70,10 @@ module orchestrator 'modules/container-app.bicep' = {
     image: '${acr.outputs.loginServer}/maf-orchestrator:latest'
     environment: environment
     acaEnvName: acaEnv.outputs.name
-    // Add env vars for Cosmos, Foundry, etc.
+    // Pass non-secret config; secrets via Key Vault + Managed Identity
+    envVars: {
+      COSMOS_ENDPOINT: cosmos.outputs.endpoint
+    }
   }
 }
 
