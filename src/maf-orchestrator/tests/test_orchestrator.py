@@ -32,3 +32,16 @@ async def test_orchestrate_endpoint():
         data = response.json()
         assert data["status"] == "processed"
         assert "result" in data
+        assert "checkpoint_id" in data  # MAF state support
+
+@pytest.mark.asyncio
+async def test_resume_with_checkpoint():
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        # First call
+        resp1 = await ac.post("/orchestrate", json={"prompt": "Analyze and execute"})
+        ckpt = resp1.json().get("checkpoint_id")
+        
+        # Resume call
+        resp2 = await ac.post("/orchestrate", json={"prompt": "Analyze and execute", "checkpoint_id": ckpt})
+        assert resp2.status_code == 200
+        assert resp2.json().get("checkpoint_id") == ckpt

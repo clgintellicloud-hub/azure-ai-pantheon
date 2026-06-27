@@ -16,7 +16,7 @@ Use simple markdown checkboxes. Move completed items to a "Done" section or dele
 - [x] Review and improve Bicep (added acr, aca-env, cosmos, key-vault modules)
 - [ ] Flesh out remaining Bicep modules (monitoring, foundry, etc.)
 - [ ] Wire real integration points to Hermes and OpenClaw (start with HTTP)
-- [ ] Add Cosmos DB for state in orchestrator code
+- [x] Add Cosmos DB for state in orchestrator code (with MAF checkpointing + resume)
 - [ ] Upgrade GitHub Actions workflows to use OIDC properly
 - [ ] Decide on primary language for MAF (Python strongly recommended)
 

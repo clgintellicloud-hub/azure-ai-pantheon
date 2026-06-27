@@ -11,6 +11,10 @@ services:
       - "8000:8000"
     environment:
       - COSMOS_ENDPOINT=${COSMOS_ENDPOINT:-}
+      - COSMOS_KEY=${COSMOS_KEY:-}
+      - COSMOS_DATABASE=${COSMOS_DATABASE:-pantheon}
+      - COSMOS_CONTAINER=${COSMOS_CONTAINER:-workflow_state}
+      - USE_COSMOS_STATE=${USE_COSMOS_STATE:-true}
       - FOUNDRY_ENDPOINT=${FOUNDRY_ENDPOINT:-}
       - HERMES_ENDPOINT=http://hermes-agent:8080
       - OPENCLAW_ENDPOINT=http://openclaw-agent:8080

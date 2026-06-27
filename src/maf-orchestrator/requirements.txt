@@ -5,10 +5,12 @@ httpx
 pydantic
 # Microsoft Agent Framework (MAF)
 agent-framework
-# Observability (Phase 1 foundation)
+# Observability
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-otlp
-# Optional later
-# azure-identity
-# azure-cosmos
+# State & Cosmos DB
+azure-cosmos
+azure-identity
+# Note: azure-identity for Managed Identity in Azure, azure-cosmos for persistence
+

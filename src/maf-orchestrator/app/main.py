@@ -30,6 +30,7 @@ app = FastAPI(title="azure-ai-pantheon MAF Orchestrator")
 class TaskRequest(BaseModel):
     prompt: str
     metadata: dict = {}
+    checkpoint_id: str | None = None  # For resuming MAF workflow state from Cosmos
 
 @app.get("/health")
 async def health():
@@ -47,29 +48,35 @@ async def orchestrate(request: TaskRequest):
     - Planning step
     - Conditional handoff to HermesAgent / OpenClawAgent / Both
     - Basic success/failure handling
+    - Cosmos DB checkpointing for durable state (if configured)
     """
     with tracer.start_as_current_span("orchestrate_task"):
-        logger.info(f"Received task: {request.prompt[:100]}...")
+        logger.info(f"Received task: {request.prompt[:100]}... (checkpoint={request.checkpoint_id})")
         
-        result = await run_pantheon_workflow(request.prompt)
+        result = await run_pantheon_workflow(
+            prompt=request.prompt, 
+            checkpoint_id=request.checkpoint_id
+        )
         
         # Extract agents from different result shapes
         agents = []
-        if "execution" in result:
-            if isinstance(result["execution"], dict) and "hermes" in result["execution"]:
-                agents = ["hermes", "openclaw"]
-            elif "agent" in result.get("execution", {}):
-                agents = [result["execution"]["agent"]]
+        exec_data = result.get("execution", {})
+        if isinstance(exec_data, dict) and "hermes" in exec_data:
+            agents = ["hermes", "openclaw"]
+        elif "agent" in exec_data:
+            agents = [exec_data["agent"]]
+        
         logger.info(f"Workflow completed for task. Agents used: {agents}")
         
         return {
             "status": "processed",
             "input": request.prompt,
+            "checkpoint_id": result.get("checkpoint_id"),
             "result": result
         }
 
 @app.post("/tasks")
 async def submit_task(request: TaskRequest):
-    """Task submission endpoint (Phase 1 goal)."""
+    """Task submission endpoint (supports resume via checkpoint_id)."""
     response = await orchestrate(request)
-    return {"task_id": "local-demo-001", **response}
+    return {"task_id": response.get("checkpoint_id", "local-demo-001"), **response}

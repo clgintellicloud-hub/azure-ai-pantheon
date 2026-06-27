@@ -3,9 +3,14 @@
 
 import httpx
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from agent_framework import Agent, Workflow, tool
+
+from app.state import state_store
+from app.config import get_settings
+
+settings = get_settings()
 
 HERMES_ENDPOINT = os.getenv("HERMES_ENDPOINT", "http://localhost:8081")
 OPENCLAW_ENDPOINT = os.getenv("OPENCLAW_ENDPOINT", "http://localhost:8082")
@@ -156,38 +161,85 @@ async def create_pantheon_workflow() -> Workflow:
     
     return wf
 
-# Convenience function for FastAPI
-async def run_pantheon_workflow(prompt: str) -> dict[str, Any]:
+# Convenience function for FastAPI with MAF checkpointing support
+async def run_pantheon_workflow(
+    prompt: str, 
+    checkpoint_id: Optional[str] = None
+) -> dict[str, Any]:
     """
-    Entry point that runs the full MAF workflow graph.
+    Entry point that runs the full MAF workflow graph with state persistence.
+
+    - If checkpoint_id is provided, attempts to resume from previous state.
+    - Saves state after planning and after each agent handoff (MAF checkpointing).
+    - Returns the final result + checkpoint_id for future resumption.
     """
-    workflow = await create_pantheon_workflow()
-    
-    # Run the workflow starting from plan
-    # Note: In full MAF, you would use workflow.run() or similar entrypoint
-    plan = await plan_task(prompt)
-    
+    # Try to resume from checkpoint
+    previous_state = None
+    if checkpoint_id:
+        previous_state = await state_store.load_state(checkpoint_id)
+        if previous_state:
+            print(f"[Checkpoint] Resuming from {checkpoint_id}")
+            # For simplicity in Phase 2, we can return saved state or re-execute missing parts.
+            # Here we re-execute but use saved plan if available.
+            if "plan" in previous_state:
+                plan = previous_state["plan"]
+            else:
+                plan = await plan_task(prompt)
+        else:
+            print(f"[Checkpoint] Checkpoint {checkpoint_id} not found, starting fresh.")
+            plan = await plan_task(prompt)
+    else:
+        plan = await plan_task(prompt)
+
+    # Save initial state after planning
+    checkpoint_id = await state_store.save_state(
+        checkpoint_id=checkpoint_id,
+        task=prompt,
+        plan=plan,
+        results=[],
+        status="in_progress"
+    )
+
     route = plan.get("route")
-    results = []
-    
-    if route in ["hermes", "both"]:
+    results = previous_state.get("results", []) if previous_state else []
+
+    if route in ["hermes", "both"] and not any(r.get("agent") == "hermes" for r in results):
         hermes_out = await handoff_to_hermes(plan)
         results.append(hermes_out)
-    
-    if route in ["openclaw", "both"]:
+        await state_store.update_result(checkpoint_id, hermes_out)
+
+    if route in ["openclaw", "both"] and not any(r.get("agent") == "openclaw" for r in results):
         openclaw_out = await handoff_to_openclaw(plan)
         results.append(openclaw_out)
-    
+        await state_store.update_result(checkpoint_id, openclaw_out)
+
+    final_result: Dict[str, Any]
     if route == "both":
-        combined = await combine_results(results[0], results[1] if len(results) > 1 else {})
-        return {
+        # For "both" we may need to combine
+        hermes_r = next((r for r in results if r.get("agent") == "hermes"), {})
+        openclaw_r = next((r for r in results if r.get("agent") == "openclaw"), {})
+        combined = await combine_results(hermes_r, openclaw_r)
+        final_result = {
             "plan": plan,
             "execution": combined,
-            "workflow": "MAF graph with conditional handoff"
+            "workflow": "MAF graph with conditional handoff + checkpointing"
         }
-    
-    return {
-        "plan": plan,
-        "execution": results[0] if results else {},
-        "workflow": "MAF graph with conditional handoff"
-    }
+    else:
+        final_result = {
+            "plan": plan,
+            "execution": results[0] if results else {},
+            "workflow": "MAF graph with conditional handoff + checkpointing"
+        }
+
+    # Final save
+    await state_store.save_state(
+        checkpoint_id=checkpoint_id,
+        task=prompt,
+        plan=plan,
+        results=results,
+        status="completed"
+    )
+
+    final_result["checkpoint_id"] = checkpoint_id
+    return final_result
+
