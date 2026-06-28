@@ -96,6 +96,7 @@ module orchestrator 'modules/container-app.bicep' = {
     // Pass non-secret config; secrets via Key Vault + Managed Identity
     envVars: {
       COSMOS_ENDPOINT: cosmos.outputs.endpoint
+      FOUNDRY_ENDPOINT: foundry.outputs.foundryEndpoint
     }
   }
 }
