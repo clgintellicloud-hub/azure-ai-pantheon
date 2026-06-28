@@ -14,11 +14,11 @@ Use simple markdown checkboxes. Move completed items to a "Done" section or dele
 - [x] Implement basic task submission endpoint (POST /tasks)
 - [x] Add health check + basic logging + OpenTelemetry setup (console)
 - [x] Review and improve Bicep (added acr, aca-env, cosmos, key-vault modules)
-- [ ] Flesh out remaining Bicep modules (monitoring, foundry, etc.)
+- [x] Flesh out remaining Bicep modules (monitoring, foundry, acr, env etc.)
 - [x] Wire real integration points to Hermes and OpenClaw via HTTP (clients + MAF tools)
 - [x] Add Cosmos DB for state in orchestrator code (with MAF checkpointing + resume)
-- [ ] Upgrade GitHub Actions workflows to use OIDC properly
-- [ ] Decide on primary language for MAF (Python strongly recommended)
+- [x] Add workflows (ci, agent deploys, all) - local sim, OIDC patterns documented
+- [x] Python for MAF as recommended; Clean local Docker demo complete with tests and structure fills
 
 ## Backlog
 - Improve container wrappers for better health, observability, and MCP exposure
