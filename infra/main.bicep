@@ -81,8 +81,43 @@ module foundry 'modules/foundry.bicep' = {
   }
 }
 
+// Azure OpenAI for production LLM planning/tool calling
+module openai 'modules/openai.bicep' = {
+  name: 'openai'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+  }
+}
+
+// Azure Service Bus for Dapr pub/sub agent events
+module serviceBus 'modules/service-bus.bicep' = {
+  name: 'serviceBus'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+  }
+}
+
+// Dapr state/pubsub components hosted by the ACA environment
+module daprComponents 'modules/dapr-components.bicep' = {
+  name: 'daprComponents'
+  scope: rg
+  params: {
+    acaEnvName: acaEnv.outputs.name
+    cosmosEndpoint: cosmos.outputs.endpoint
+    cosmosDatabase: 'pantheon'
+    cosmosContainer: 'workflow_state'
+    serviceBusNamespaceName: serviceBus.outputs.namespaceName
+    serviceBusTopicName: serviceBus.outputs.topicName
+  }
+}
+
 output monitoringKey string = monitoring.outputs.instrumentationKey
 output foundryEndpoint string = foundry.outputs.foundryEndpoint
+output azureOpenAiEndpoint string = openai.outputs.endpoint
 
 // Container Apps
 module orchestrator 'modules/container-app.bicep' = {
@@ -94,6 +129,8 @@ module orchestrator 'modules/container-app.bicep' = {
     environment: environment
     acaEnvName: acaEnv.outputs.name
     targetPort: 8000
+    enableDapr: true
+    daprAppId: 'orchestrator'
     // Pass non-secret config; secrets via Key Vault + Managed Identity
     envVars: {
       COSMOS_ENDPOINT: cosmos.outputs.endpoint
@@ -102,7 +139,13 @@ module orchestrator 'modules/container-app.bicep' = {
       USE_COSMOS_STATE: 'true'
       HERMES_ENDPOINT: 'https://${hermesAgent.outputs.fqdn}'
       OPENCLAW_ENDPOINT: 'https://${openclawAgent.outputs.fqdn}'
+      HERMES_DAPR_APP_ID: 'hermes-agent'
+      OPENCLAW_DAPR_APP_ID: 'openclaw-agent'
+      DAPR_STATE_STORE: daprComponents.outputs.stateComponentName
+      DAPR_PUBSUB: daprComponents.outputs.pubsubComponentName
       FOUNDRY_ENDPOINT: foundry.outputs.foundryEndpoint
+      AZURE_OPENAI_ENDPOINT: openai.outputs.endpoint
+      AZURE_OPENAI_DEPLOYMENT: openai.outputs.deploymentName
     }
   }
 }
@@ -115,6 +158,9 @@ module hermesAgent 'modules/container-app.bicep' = {
     image: '${acr.outputs.loginServer}/hermes-agent:latest'
     environment: environment
     acaEnvName: acaEnv.outputs.name
+    enableDapr: true
+    daprAppId: 'hermes-agent'
+    externalIngress: false
   }
 }
 
@@ -126,6 +172,9 @@ module openclawAgent 'modules/container-app.bicep' = {
     image: '${acr.outputs.loginServer}/openclaw-agent:latest'
     environment: environment
     acaEnvName: acaEnv.outputs.name
+    enableDapr: true
+    daprAppId: 'openclaw-agent'
+    externalIngress: false
   }
 }
 
@@ -135,6 +184,8 @@ module orchestratorAccess 'modules/orchestrator-access.bicep' = {
   params: {
     cosmosAccountName: cosmos.outputs.accountName
     keyVaultName: kv.outputs.name
+    serviceBusNamespaceName: serviceBus.outputs.namespaceName
+    openAiAccountName: openai.outputs.accountName
     orchestratorPrincipalId: orchestrator.outputs.principalId
   }
 }

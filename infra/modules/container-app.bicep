@@ -6,6 +6,9 @@ param image string
 param environment string
 param acaEnvName string
 param targetPort int = 8080
+param externalIngress bool = true
+param enableDapr bool = false
+param daprAppId string = ''
 param envVars object = {}
 
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
@@ -18,9 +21,15 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     managedEnvironmentId: resourceId('Microsoft.App/managedEnvironments', acaEnvName)
     configuration: {
       ingress: {
-        external: true
+        external: externalIngress
         targetPort: targetPort
       }
+      dapr: enableDapr ? {
+        enabled: true
+        appId: empty(daprAppId) ? name : daprAppId
+        appPort: targetPort
+        appProtocol: 'http'
+      } : null
     }
     template: {
       containers: [

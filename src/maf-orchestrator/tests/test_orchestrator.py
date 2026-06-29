@@ -9,6 +9,8 @@ from httpx import AsyncClient, ASGITransport
 # For full integration tests, use docker compose and test against ports
 
 from app.main import app
+from app.config import RouteConfig
+from app.agents.hermes_client import HermesClient
 from app.workflows.task_router import plan_task, run_pantheon_workflow
 
 
@@ -63,8 +65,8 @@ async def test_route_decisions():
     openclaw_plan = await plan_task("Book a flight")
     both_plan = await plan_task("Research the market and also execute outreach")
 
-    assert hermes_plan["route"] == "hermes"
-    assert openclaw_plan["route"] == "openclaw"
+    assert hermes_plan["route"] == "researcher"
+    assert openclaw_plan["route"] == "executor"
     assert both_plan["route"] == "both"
 
 @pytest.mark.asyncio
@@ -78,3 +80,21 @@ async def test_orchestrate_does_not_log_raw_prompt(caplog):
     assert response.status_code == 200
     assert secret_prompt not in caplog.text
     assert "SECRET_TOKEN_123" not in caplog.text
+
+
+def test_route_config_supports_specialized_agents():
+    route_config = RouteConfig.from_json(
+        '{"researcher":{"agent":"hermes","keywords":["literature"],"capabilities":["research"]}}'
+    )
+
+    assert route_config.resolve("Do a literature review").route == "researcher"
+    assert route_config.resolve("Do a literature review").agents == ["hermes"]
+
+
+@pytest.mark.asyncio
+async def test_hermes_client_uses_dapr_service_invocation(monkeypatch):
+    monkeypatch.setenv("DAPR_HTTP_PORT", "3500")
+    monkeypatch.setenv("HERMES_DAPR_APP_ID", "researcher-agent")
+    client = HermesClient()
+
+    assert client.invoke_url("execute") == "http://localhost:3500/v1.0/invoke/researcher-agent/method/execute"

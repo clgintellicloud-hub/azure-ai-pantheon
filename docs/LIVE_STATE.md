@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-28 (Phase 4 agent runtime wrappers completed)
+**Last Updated**: 2026-06-29 (Phase 5 Dapr production orchestration implemented)
 
 ---
 
@@ -12,18 +12,20 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `clg/phase4-real-agent-runtime-containers`
+**Branch**: `clg/phase5-production-dapr-orchestration`
 
-- Completed phases 1-3 and merged them to `main`.
-- Started and completed Phase 4 — Real Agent Runtime Containers:
-  - Converted Hermes and OpenClaw mock apps into HTTP wrappers that preserve `GET /health` and `POST /execute`.
-  - Added simulator mode when no runtime command is configured.
-  - Added runtime command mode via `AGENT_RUNTIME_COMMAND` and `AGENT_RUNTIME_TIMEOUT_SECONDS`.
-  - Added structured timeout, missing-command, and non-zero-exit responses.
-  - Added wrapper smoke tests covering simulator contracts, runtime success, and runtime failure.
-  - Added runtime command env vars to `compose.yaml` and `.env.example`.
-  - Replaced the example Cosmos emulator key in `.env.example` with a placeholder.
-- Verification passed: agent wrapper tests `4 passed`; orchestrator tests `7 passed, 2 warnings`; `docker compose config --quiet` succeeded.
+- Completed phases 1-4 and merged them to `main`.
+- Started and completed Phase 5 — Production Dapr Orchestration:
+  - Added `docs/production-ai-agent-orchestrator.md` in the requested architecture/output format.
+  - Added Dapr-aware orchestrator config: Dapr sidecar port, Dapr app IDs, state store, pub/sub, and configurable route JSON.
+  - Added capability-based routing via `RouteConfig` with researcher/coder/executor/reviewer/both routes.
+  - Added `DaprAgentClient` with Dapr service invocation and direct HTTP fallback.
+  - Updated Hermes/OpenClaw clients to use Dapr service invocation when `DAPR_HTTP_PORT` is set.
+  - Added Azure OpenAI, Azure Service Bus, and Dapr component Bicep modules.
+  - Enabled Dapr on orchestrator and agent Container Apps.
+  - Added base specialized Python agent template under `agents/templates/python-agent`.
+  - Added tests for configurable routes and Dapr invocation URL generation.
+- Verification passed: orchestrator tests `9 passed, 2 warnings`; agent wrapper tests `4 passed`; `az bicep build --file infra/main.bicep` succeeded with warnings only; `docker compose config --quiet` succeeded.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -32,11 +34,11 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Commit and merge Phase 4 after final review.
-2. Start Phase 5 on a new `clg/` branch: production orchestration behavior.
-3. Convert keyword routing into configurable capability-based routing.
-4. Add timeout/retry/partial-success behavior to agent clients.
-5. Preserve the external `/tasks` and `/orchestrate` APIs while improving internals.
+1. Commit and merge Phase 5 after final review.
+2. Start Phase 6 on a new `clg/` branch: observability and operations.
+3. Wire OpenTelemetry export to Azure Monitor/Application Insights.
+4. Add `/health/deep` checks for Cosmos, Dapr, Hermes, OpenClaw, and Azure OpenAI config.
+5. Add deployment smoke tests and runbooks.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)
