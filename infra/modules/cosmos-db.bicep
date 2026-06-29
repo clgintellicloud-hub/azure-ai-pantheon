@@ -45,3 +45,4 @@ resource workflows 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
 
 output endpoint string = cosmos.properties.documentEndpoint
 output accountName string = cosmos.name
+output accountId string = cosmos.id

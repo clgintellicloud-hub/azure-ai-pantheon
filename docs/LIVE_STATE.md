@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-28 (Phase 2 local orchestrator reliability completed)
+**Last Updated**: 2026-06-28 (Phase 3 Azure agent endpoint wiring completed)
 
 ---
 
@@ -12,18 +12,18 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `clg/phase2-local-orchestrator-reliability`
+**Branch**: `clg/phase3-azure-agent-endpoint-wiring`
 
-- Completed Phase 1 and merged it to `main`.
-- Started and completed Phase 2 — Local Orchestrator Reliability:
-  - Updated FastAPI endpoint tests to use `httpx.ASGITransport`.
-  - Added route-decision coverage for Hermes-only, OpenClaw-only, and both-agent prompts.
-  - Added regression coverage to prevent raw prompt/secret logging.
-  - Added safer orchestration request logging based on prompt length and checkpoint ID.
-  - Added structured `HTTPException` mapping for unexpected workflow failures.
-  - Replaced mutable Pydantic default metadata with `Field(default_factory=dict)`.
-  - Preserved a top-level `result` field in `/orchestrate` responses for compatibility.
-- Verified local orchestrator tests: `7 passed, 2 warnings`.
+- Completed Phase 1 and Phase 2 and merged both to `main`.
+- Started and completed Phase 3 — Azure Agent Endpoint Wiring:
+  - Added system-assigned managed identity to Container Apps.
+  - Passed ACA-hosted `HERMES_ENDPOINT` and `OPENCLAW_ENDPOINT` into the orchestrator app.
+  - Added Hermes/OpenClaw FQDN outputs from `infra/main.bicep`.
+  - Added `infra/modules/orchestrator-access.bicep` for orchestrator access grants.
+  - Granted the orchestrator managed identity Cosmos DB SQL Built-in Data Contributor access.
+  - Granted the orchestrator managed identity Key Vault Secrets User access.
+  - Cleaned up Key Vault RBAC Bicep syntax and added module outputs needed by access wiring.
+- Verified `az bicep build --file infra/main.bicep` succeeds with warnings only.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -32,11 +32,11 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Commit and merge Phase 2 after final review.
-2. Start Phase 3 on a new `clg/` branch: Azure agent endpoint wiring.
-3. Output Hermes/OpenClaw FQDNs from Bicep.
-4. Pass `HERMES_ENDPOINT` and `OPENCLAW_ENDPOINT` into the orchestrator Container App.
-5. Add managed identity and required role assignments for Cosmos/Key Vault access.
+1. Commit and merge Phase 3 after final review.
+2. Start Phase 4 on a new `clg/` branch: real Hermes/OpenClaw runtime containers.
+3. Preserve the stable agent wrapper contract: `GET /health` and `POST /execute`.
+4. Replace mock agent implementations with wrappers around the real runtimes.
+5. Add smoke tests for each real agent container.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)

@@ -100,6 +100,8 @@ module orchestrator 'modules/container-app.bicep' = {
       COSMOS_DATABASE: 'pantheon'
       COSMOS_CONTAINER: 'workflow_state'
       USE_COSMOS_STATE: 'true'
+      HERMES_ENDPOINT: 'https://${hermesAgent.outputs.fqdn}'
+      OPENCLAW_ENDPOINT: 'https://${openclawAgent.outputs.fqdn}'
       FOUNDRY_ENDPOINT: foundry.outputs.foundryEndpoint
     }
   }
@@ -127,5 +129,17 @@ module openclawAgent 'modules/container-app.bicep' = {
   }
 }
 
+module orchestratorAccess 'modules/orchestrator-access.bicep' = {
+  name: 'orchestratorAccess'
+  scope: rg
+  params: {
+    cosmosAccountName: cosmos.outputs.accountName
+    keyVaultName: kv.outputs.name
+    orchestratorPrincipalId: orchestrator.outputs.principalId
+  }
+}
+
 output acrLoginServer string = acr.outputs.loginServer
 output orchestratorFqdn string = orchestrator.outputs.fqdn
+output hermesFqdn string = hermesAgent.outputs.fqdn
+output openclawFqdn string = openclawAgent.outputs.fqdn

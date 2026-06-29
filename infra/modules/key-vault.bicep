@@ -10,9 +10,11 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
   properties: {
     sku: { family: 'A', name: 'standard' }
     tenantId: subscription().tenantId
-    enableRbacAuthorization: true  // Recommended: use RBAC + Managed Identity
+    // Recommended: use RBAC + Managed Identity.
+    enableRbacAuthorization: true
   }
 }
 
 output vaultUri string = kv.properties.vaultUri
 output name string = kv.name
+output id string = kv.id

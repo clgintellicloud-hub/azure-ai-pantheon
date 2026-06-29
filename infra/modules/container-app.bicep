@@ -11,6 +11,9 @@ param envVars object = {}
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: name
   location: resourceGroup().location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     managedEnvironmentId: resourceId('Microsoft.App/managedEnvironments', acaEnvName)
     configuration: {
@@ -44,3 +47,4 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 output fqdn string = app.properties.configuration.ingress.fqdn
+output principalId string = app.identity.principalId
