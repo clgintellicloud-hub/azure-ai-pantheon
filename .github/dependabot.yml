@@ -1,10 +1,19 @@
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/src/maf-orchestrator"
-    schedule:
-      interval: "weekly"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels: ["dependencies", "github-actions"]
+
+  - package-ecosystem: "pip"
+    directory: "/src/maf-orchestrator"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "python"]
+
+  - package-ecosystem: "docker"
+    directory: "/src/maf-orchestrator"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "docker"]
