@@ -34,6 +34,8 @@ services:
       - "8081:8080"
     environment:
       - AGENT_NAME=hermes
+      - AGENT_RUNTIME_COMMAND=${HERMES_AGENT_RUNTIME_COMMAND:-}
+      - AGENT_RUNTIME_TIMEOUT_SECONDS=${AGENT_RUNTIME_TIMEOUT_SECONDS:-60}
 
   openclaw-agent:
     build: ./agents/openclaw-agent
@@ -41,3 +43,5 @@ services:
       - "8082:8080"
     environment:
       - AGENT_NAME=openclaw
+      - AGENT_RUNTIME_COMMAND=${OPENCLAW_AGENT_RUNTIME_COMMAND:-}
+      - AGENT_RUNTIME_TIMEOUT_SECONDS=${AGENT_RUNTIME_TIMEOUT_SECONDS:-60}
