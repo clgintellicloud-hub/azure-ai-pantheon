@@ -51,12 +51,12 @@ See `docs/EXISTING_FACTORIES_ANALYSIS.md` and `docs/KNOWN_PRIOR_WORK.md` for ana
 
 ## Contributing / Working With Agents
 - Always keep `AGENTS.md` and supporting docs up to date so future sessions (after reboots) do not lose context.
-- **All feature branches must be prefixed with `grok/`** (e.g. `grok/add-maf-orchestrator`). See [AGENTS.md](AGENTS.md) → Branching Strategy.
-- Use the helper: `.\scripts\create-grok-branch.ps1 your-feature-name` or the `git grok-branch` alias (after setup).
+- **All feature branches must be prefixed with `clg/`** (e.g. `clg/add-maf-orchestrator`). See [AGENTS.md](AGENTS.md) → Branching Strategy.
+- Use the helper: `.\scripts\create-clg-branch.ps1 your-feature-name`.
 - **Security first**: Follow `docs/security-guidelines.md` and `SECURITY.md`. Never commit secrets. Use OIDC for Azure. See `.gitignore` for required patterns.
 
 ## Branching
-See the full rules in [AGENTS.md](AGENTS.md). Main stays `main`. Everything else uses the `grok/` prefix.
+See the full rules in [AGENTS.md](AGENTS.md). Main stays `main`. Everything else uses the `clg/` prefix.
 
 ## License
 TBD

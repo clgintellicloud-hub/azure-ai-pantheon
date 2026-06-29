@@ -93,9 +93,13 @@ module orchestrator 'modules/container-app.bicep' = {
     image: '${acr.outputs.loginServer}/maf-orchestrator:latest'
     environment: environment
     acaEnvName: acaEnv.outputs.name
+    targetPort: 8000
     // Pass non-secret config; secrets via Key Vault + Managed Identity
     envVars: {
       COSMOS_ENDPOINT: cosmos.outputs.endpoint
+      COSMOS_DATABASE: 'pantheon'
+      COSMOS_CONTAINER: 'workflow_state'
+      USE_COSMOS_STATE: 'true'
       FOUNDRY_ENDPOINT: foundry.outputs.foundryEndpoint
     }
   }

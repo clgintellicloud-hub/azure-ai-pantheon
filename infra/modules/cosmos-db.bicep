@@ -34,11 +34,11 @@ resource db 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-08-15' = {
 // Collections for state, memory, etc.
 resource workflows 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-08-15' = {
   parent: db
-  name: 'workflows'
+  name: 'workflow_state'
   properties: {
     resource: {
-      id: 'workflows'
-      partitionKey: { paths: ['/taskId'], kind: 'Hash' }
+      id: 'workflow_state'
+      partitionKey: { paths: ['/id'], kind: 'Hash' }
     }
   }
 }

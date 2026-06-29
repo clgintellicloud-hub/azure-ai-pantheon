@@ -173,17 +173,17 @@ Following this protocol means that even if the entire conversation history disap
 
 ## Branching Strategy
 
-**All feature branches MUST use the `grok/` prefix.**
+**All feature branches MUST use the `clg/` prefix.**
 
 ### Rules
 - `main` remains `main` (never prefixed).
 - Feature, enhancement, fix, refactor, docs, etc. branches must be named:
-  - `grok/<kebab-case-description>`
+  - `clg/<kebab-case-description>`
 - Examples:
-  - `grok/add-maf-orchestrator`
-  - `grok/hermes-openclaw-integration`
-  - `grok/improve-aca-deployment`
-  - `grok/context-persistence-updates`
+  - `clg/add-maf-orchestrator`
+  - `clg/hermes-openclaw-integration`
+  - `clg/improve-aca-deployment`
+  - `clg/context-persistence-updates`
 - Never use bare names like `feature-x`, `my-work`, etc.
 
 ### How to Create a Feature Branch
@@ -191,38 +191,26 @@ Use the provided helper script (recommended):
 
 ```powershell
 cd <project-root>
-.\scripts\create-grok-branch.ps1 add-maf-orchestrator
+.\scripts\create-clg-branch.ps1 add-maf-orchestrator
 # or with bypass if needed:
-powershell -ExecutionPolicy Bypass -File .\scripts\create-grok-branch.ps1 "your-feature-name"
+powershell -ExecutionPolicy Bypass -File .\scripts\create-clg-branch.ps1 "your-feature-name"
 ```
 
-The script normalizes the name and enforces the `grok/` prefix.
+The script normalizes the name and enforces the `clg/` prefix.
 
 Alternatively (manual):
 ```powershell
-git checkout -b grok/your-feature-name
-```
-
-### Git Alias (Optional Convenience)
-The alias is already configured in this working tree:
-```powershell
-git grok-branch add-maf-orchestrator
-```
-
-**Note**: The alias is basic and accepts only the feature name (it creates + checks out `grok/<name>`).  
-For flags like `-NoCheckout`, call the script directly:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\create-grok-branch.ps1 "add-maf-orchestrator" -NoCheckout
+git checkout -b clg/your-feature-name
 ```
 
 ### Why the Prefix?
-- Clearly identifies branches created as part of Grok-assisted development in this project.
+- Clearly identifies branches created as part of Chris/CLG-led development in this project.
 - Makes it easy to filter and manage work in GitHub, PRs, and local checkout.
 - Enforces team / agent consistency.
 
-This rule applies to **all current and future feature branches**. If you see a non-`grok/` feature branch, rename it:
+This rule applies to **all current and future feature branches**. If you see a non-`clg/` feature branch, rename it:
 ```powershell
-git branch -m old-name grok/old-name
+git branch -m old-name clg/old-name
 ```
 
 ## Contact / Ownership

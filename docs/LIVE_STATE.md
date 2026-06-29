@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-27 (Routine context saving protocol fully active and documented)
+**Last Updated**: 2026-06-28 (Azure orchestrator implementation phases started)
 
 ---
 
@@ -12,18 +12,16 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `grok/azure-maf-architecture`
+**Branch**: `clg/phase1-azure-deploy-foundation`
 
-- Implementing the full recommended Azure architecture for MAF-based orchestration of Hermes + OpenClaw agents.
-- Added `docs/architecture.md` (core services table, high-level architecture, detailed GitHub repo file structure).
-- Scaffolded production-ready project layout:
-  - `infra/` with Bicep (main + reusable modules)
-  - `src/maf-orchestrator/` (FastAPI + MAF skeleton)
-  - `agents/` placeholders
-  - `compose.yaml`, `azd.yaml`
-  - GitHub Actions workflow stubs for controllable deploys
-- Updated README.md and AGENTS.md to make the architecture the guiding reference.
-- Builds directly on `docs/EXISTING_FACTORIES_ANALYSIS.md`.
+- Documented the Azure orchestrator implementation phases in `docs/azure-orchestrator-implementation-phases.md`.
+- Updated branching convention for this effort to `clg/` feature branches.
+- Started Phase 1 — Azure Deploy Foundation:
+  - Fixed reusable Container App env var rendering to use Bicep `items()`.
+  - Added per-app `targetPort` support so the orchestrator can target port `8000` while agents keep `8080`.
+  - Aligned Cosmos workflow state container to `workflow_state` with `/id` partition key.
+  - Passed orchestrator Cosmos runtime config through Bicep.
+- Verified `az bicep build --file infra/main.bicep` succeeds with warnings only.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -32,11 +30,11 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Continue deep dive on this branch: Bicep modules, GitHub Actions workflows, agent variants.
-2. Identify concrete extension points for MAF orchestration (HTTP, health, config).
-3. Research current MAF patterns for multi-agent orchestration and ACA deployment.
-4. Propose high-level architecture for the Pantheon conductor (in a follow-up document or PR).
-5. (Routine) Use save-context discipline after progress.
+1. Commit and merge Phase 1 after final review.
+2. Start Phase 2 on a new `clg/` branch: local orchestrator reliability.
+3. Fix `httpx` tests with `ASGITransport`.
+4. Add structured orchestration errors and safer logging.
+5. Add tests for Hermes-only, OpenClaw-only, both-agent routing, and checkpoint resume.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)
