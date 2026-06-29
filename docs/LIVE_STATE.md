@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-28 (Phase 3 Azure agent endpoint wiring completed)
+**Last Updated**: 2026-06-28 (Phase 4 agent runtime wrappers completed)
 
 ---
 
@@ -12,18 +12,18 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `clg/phase3-azure-agent-endpoint-wiring`
+**Branch**: `clg/phase4-real-agent-runtime-containers`
 
-- Completed Phase 1 and Phase 2 and merged both to `main`.
-- Started and completed Phase 3 — Azure Agent Endpoint Wiring:
-  - Added system-assigned managed identity to Container Apps.
-  - Passed ACA-hosted `HERMES_ENDPOINT` and `OPENCLAW_ENDPOINT` into the orchestrator app.
-  - Added Hermes/OpenClaw FQDN outputs from `infra/main.bicep`.
-  - Added `infra/modules/orchestrator-access.bicep` for orchestrator access grants.
-  - Granted the orchestrator managed identity Cosmos DB SQL Built-in Data Contributor access.
-  - Granted the orchestrator managed identity Key Vault Secrets User access.
-  - Cleaned up Key Vault RBAC Bicep syntax and added module outputs needed by access wiring.
-- Verified `az bicep build --file infra/main.bicep` succeeds with warnings only.
+- Completed phases 1-3 and merged them to `main`.
+- Started and completed Phase 4 — Real Agent Runtime Containers:
+  - Converted Hermes and OpenClaw mock apps into HTTP wrappers that preserve `GET /health` and `POST /execute`.
+  - Added simulator mode when no runtime command is configured.
+  - Added runtime command mode via `AGENT_RUNTIME_COMMAND` and `AGENT_RUNTIME_TIMEOUT_SECONDS`.
+  - Added structured timeout, missing-command, and non-zero-exit responses.
+  - Added wrapper smoke tests covering simulator contracts, runtime success, and runtime failure.
+  - Added runtime command env vars to `compose.yaml` and `.env.example`.
+  - Replaced the example Cosmos emulator key in `.env.example` with a placeholder.
+- Verification passed: agent wrapper tests `4 passed`; orchestrator tests `7 passed, 2 warnings`; `docker compose config --quiet` succeeded.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -32,11 +32,11 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Commit and merge Phase 3 after final review.
-2. Start Phase 4 on a new `clg/` branch: real Hermes/OpenClaw runtime containers.
-3. Preserve the stable agent wrapper contract: `GET /health` and `POST /execute`.
-4. Replace mock agent implementations with wrappers around the real runtimes.
-5. Add smoke tests for each real agent container.
+1. Commit and merge Phase 4 after final review.
+2. Start Phase 5 on a new `clg/` branch: production orchestration behavior.
+3. Convert keyword routing into configurable capability-based routing.
+4. Add timeout/retry/partial-success behavior to agent clients.
+5. Preserve the external `/tasks` and `/orchestrate` APIs while improving internals.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)
