@@ -5,8 +5,8 @@
 # Never hardcode credentials. See docs/security-guidelines.md
 
 import asyncio
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 import logging
 import os
@@ -29,7 +29,7 @@ app = FastAPI(title="azure-ai-pantheon MAF Orchestrator")
 
 class TaskRequest(BaseModel):
     prompt: str
-    metadata: dict = {}
+    metadata: dict = Field(default_factory=dict)
     checkpoint_id: str | None = None  # For resuming MAF workflow state from Cosmos
 
 @app.get("/health")
@@ -51,12 +51,23 @@ async def orchestrate(request: TaskRequest):
     - Cosmos DB checkpointing for durable state (if configured)
     """
     with tracer.start_as_current_span("orchestrate_task"):
-        logger.info(f"Received task: {request.prompt[:100]}... (checkpoint={request.checkpoint_id})")
-        
-        result = await run_pantheon_workflow(
-            prompt=request.prompt, 
-            checkpoint_id=request.checkpoint_id
+        logger.info(
+            "Received task request: prompt_length=%s checkpoint=%s",
+            len(request.prompt),
+            request.checkpoint_id,
         )
+        
+        try:
+            result = await run_pantheon_workflow(
+                prompt=request.prompt,
+                checkpoint_id=request.checkpoint_id
+            )
+        except Exception as exc:
+            logger.exception("Workflow execution failed")
+            raise HTTPException(
+                status_code=502,
+                detail="Workflow execution failed"
+            ) from exc
         
         # Extract agents from different result shapes
         agents = []
@@ -73,6 +84,7 @@ async def orchestrate(request: TaskRequest):
             "input": request.prompt,
             "checkpoint_id": result.get("checkpoint_id"),
             "agents_used": result.get("agents_used", []),
+            "result": result,
             "plan": result.get("plan"),
             "summary": result.get("summary"),
             "details": result.get("execution")

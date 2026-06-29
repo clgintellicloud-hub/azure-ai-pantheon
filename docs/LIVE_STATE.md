@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-28 (Azure orchestrator implementation phases started)
+**Last Updated**: 2026-06-28 (Phase 2 local orchestrator reliability completed)
 
 ---
 
@@ -12,16 +12,18 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `clg/phase1-azure-deploy-foundation`
+**Branch**: `clg/phase2-local-orchestrator-reliability`
 
-- Documented the Azure orchestrator implementation phases in `docs/azure-orchestrator-implementation-phases.md`.
-- Updated branching convention for this effort to `clg/` feature branches.
-- Started Phase 1 — Azure Deploy Foundation:
-  - Fixed reusable Container App env var rendering to use Bicep `items()`.
-  - Added per-app `targetPort` support so the orchestrator can target port `8000` while agents keep `8080`.
-  - Aligned Cosmos workflow state container to `workflow_state` with `/id` partition key.
-  - Passed orchestrator Cosmos runtime config through Bicep.
-- Verified `az bicep build --file infra/main.bicep` succeeds with warnings only.
+- Completed Phase 1 and merged it to `main`.
+- Started and completed Phase 2 — Local Orchestrator Reliability:
+  - Updated FastAPI endpoint tests to use `httpx.ASGITransport`.
+  - Added route-decision coverage for Hermes-only, OpenClaw-only, and both-agent prompts.
+  - Added regression coverage to prevent raw prompt/secret logging.
+  - Added safer orchestration request logging based on prompt length and checkpoint ID.
+  - Added structured `HTTPException` mapping for unexpected workflow failures.
+  - Replaced mutable Pydantic default metadata with `Field(default_factory=dict)`.
+  - Preserved a top-level `result` field in `/orchestrate` responses for compatibility.
+- Verified local orchestrator tests: `7 passed, 2 warnings`.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -30,11 +32,11 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Commit and merge Phase 1 after final review.
-2. Start Phase 2 on a new `clg/` branch: local orchestrator reliability.
-3. Fix `httpx` tests with `ASGITransport`.
-4. Add structured orchestration errors and safer logging.
-5. Add tests for Hermes-only, OpenClaw-only, both-agent routing, and checkpoint resume.
+1. Commit and merge Phase 2 after final review.
+2. Start Phase 3 on a new `clg/` branch: Azure agent endpoint wiring.
+3. Output Hermes/OpenClaw FQDNs from Bicep.
+4. Pass `HERMES_ENDPOINT` and `OPENCLAW_ENDPOINT` into the orchestrator Container App.
+5. Add managed identity and required role assignments for Cosmos/Key Vault access.
 
 ## Current Open Questions / Risks
 - How will MAF "talk to" existing Hermes/OpenClaw runtimes? (HTTP endpoints, MCP, A2A protocol, direct calls, etc.)

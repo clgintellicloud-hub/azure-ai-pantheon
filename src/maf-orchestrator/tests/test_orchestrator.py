@@ -2,17 +2,23 @@
 
 import pytest
 import asyncio
-from httpx import AsyncClient
+import logging
+from httpx import AsyncClient, ASGITransport
 
 # Note: These tests assume the app is importable and mocks are running
 # For full integration tests, use docker compose and test against ports
 
 from app.main import app
-from app.workflows.task_router import run_pantheon_workflow
+from app.workflows.task_router import plan_task, run_pantheon_workflow
+
+
+def make_test_client():
+    transport = ASGITransport(app=app)
+    return AsyncClient(transport=transport, base_url="http://test")
 
 @pytest.mark.asyncio
 async def test_health():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with make_test_client() as ac:
         response = await ac.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
@@ -26,7 +32,7 @@ async def test_pantheon_workflow():
 
 @pytest.mark.asyncio
 async def test_orchestrate_endpoint():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with make_test_client() as ac:
         response = await ac.post("/orchestrate", json={"prompt": "Execute a simple task"})
         assert response.status_code == 200
         data = response.json()
@@ -36,7 +42,7 @@ async def test_orchestrate_endpoint():
 
 @pytest.mark.asyncio
 async def test_resume_with_checkpoint():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with make_test_client() as ac:
         # First call
         resp1 = await ac.post("/orchestrate", json={"prompt": "Analyze and execute"})
         ckpt = resp1.json().get("checkpoint_id")
@@ -50,3 +56,25 @@ async def test_resume_with_checkpoint():
 async def test_both_route():
     result = await run_pantheon_workflow("Research and also act on it")
     assert "both" in str(result.get("plan", {})).lower() or len(result.get("agents_used", [])) >= 1
+
+@pytest.mark.asyncio
+async def test_route_decisions():
+    hermes_plan = await plan_task("Analyze this complex strategy problem")
+    openclaw_plan = await plan_task("Book a flight")
+    both_plan = await plan_task("Research the market and also execute outreach")
+
+    assert hermes_plan["route"] == "hermes"
+    assert openclaw_plan["route"] == "openclaw"
+    assert both_plan["route"] == "both"
+
+@pytest.mark.asyncio
+async def test_orchestrate_does_not_log_raw_prompt(caplog):
+    secret_prompt = "Execute this task with SECRET_TOKEN_123"
+    caplog.set_level(logging.INFO, logger="maf-orchestrator")
+
+    async with make_test_client() as ac:
+        response = await ac.post("/orchestrate", json={"prompt": secret_prompt})
+
+    assert response.status_code == 200
+    assert secret_prompt not in caplog.text
+    assert "SECRET_TOKEN_123" not in caplog.text
