@@ -28,6 +28,7 @@ services:
       - DAPR_STATE_STORE=${DAPR_STATE_STORE:-workflow-state}
       - DAPR_PUBSUB=${DAPR_PUBSUB:-agent-events}
       - ROUTE_CONFIG_JSON=${ROUTE_CONFIG_JSON:-}
+      - WEBHOOK_SHARED_SECRET=${WEBHOOK_SHARED_SECRET:-}
       - HERMES_ENDPOINT=http://hermes-agent:8080
       - OPENCLAW_ENDPOINT=http://openclaw-agent:8080
     volumes:

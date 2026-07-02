@@ -148,6 +148,7 @@ Core behaviors:
 - `/health`: liveness.
 - `/tasks`: task submission alias.
 - `/orchestrate`: plan, route, execute, checkpoint, and return a structured result.
+- `/webhooks/{source}`: receive a JSON webhook payload, optionally validate HMAC-SHA256, convert it into an orchestration task, and return `202 Accepted` with a checkpoint ID.
 - Capability routing through `ROUTE_CONFIG_JSON`.
 - Dapr invocation through `DAPR_HTTP_PORT` and per-agent app IDs.
 
@@ -193,12 +194,29 @@ curl -X POST https://<orchestrator-fqdn>/orchestrate \
   -d '{"prompt":"Research the deployment and also review the implementation"}'
 ```
 
+6. Submit a webhook payload:
+
+```bash
+curl -X POST https://<orchestrator-fqdn>/webhooks/github \
+  -H 'Content-Type: application/json' \
+  -H 'X-Pantheon-Event: issue.created' \
+  -d '{"event":"issue.created","issue":{"title":"Research Dapr webhook ingress"}}'
+```
+
+For production, configure `WEBHOOK_SHARED_SECRET` as an ACA secret/Key Vault-backed value and sign the raw request body with HMAC-SHA256. Send the digest as either:
+
+```text
+X-Pantheon-Signature-256: sha256=<hex-digest>
+X-Hub-Signature-256: sha256=<hex-digest>
+```
+
 ## 8. Security & Best Practices
 
 - Use managed identity for Cosmos DB, Key Vault, Azure OpenAI, and ACR pulls.
 - Store no keys in source or app settings unless absolutely required for local development.
 - Prefer internal ingress for agent Container Apps; expose only the orchestrator publicly.
 - Do not log raw prompts or secrets.
+- Protect public webhook routes with `WEBHOOK_SHARED_SECRET`; unsigned webhooks are only appropriate for local development or private test environments.
 - Use Dapr mTLS and ACA environment boundaries for service-to-service traffic.
 - Use private networking/private endpoints for sensitive production deployments.
 - Apply least-privilege role assignments per app identity.

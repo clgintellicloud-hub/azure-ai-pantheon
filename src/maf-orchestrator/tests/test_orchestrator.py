@@ -3,6 +3,9 @@
 import pytest
 import asyncio
 import logging
+import hashlib
+import hmac
+import json
 from httpx import AsyncClient, ASGITransport
 
 # Note: These tests assume the app is importable and mocks are running
@@ -98,3 +101,59 @@ async def test_hermes_client_uses_dapr_service_invocation(monkeypatch):
     client = HermesClient()
 
     assert client.invoke_url("execute") == "http://localhost:3500/v1.0/invoke/researcher-agent/method/execute"
+
+
+@pytest.mark.asyncio
+async def test_webhook_accepts_payload_and_routes_task(monkeypatch):
+    monkeypatch.delenv("WEBHOOK_SHARED_SECRET", raising=False)
+    payload = {
+        "event": "issue.created",
+        "action": "opened",
+        "issue": {"title": "Research Azure Container Apps Dapr webhook ingress"},
+    }
+
+    async with make_test_client() as ac:
+        response = await ac.post("/webhooks/github", json=payload)
+
+    assert response.status_code == 202
+    data = response.json()
+    assert data["status"] == "accepted"
+    assert data["source"] == "github"
+    assert data["event_type"] == "issue.created"
+    assert "checkpoint_id" in data
+
+
+@pytest.mark.asyncio
+async def test_webhook_rejects_invalid_signature(monkeypatch):
+    monkeypatch.setenv("WEBHOOK_SHARED_SECRET", "test-secret")
+    payload = {"event": "deployment", "message": "Execute rollout"}
+
+    async with make_test_client() as ac:
+        response = await ac.post(
+            "/webhooks/github",
+            json=payload,
+            headers={"X-Pantheon-Signature-256": "sha256=bad"},
+        )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_webhook_accepts_valid_signature(monkeypatch):
+    secret = "test-secret"
+    monkeypatch.setenv("WEBHOOK_SHARED_SECRET", secret)
+    payload = {"event": "deployment", "message": "Execute rollout"}
+    body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    signature = "sha256=" + hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
+
+    async with make_test_client() as ac:
+        response = await ac.post(
+            "/webhooks/github",
+            content=body,
+            headers={
+                "Content-Type": "application/json",
+                "X-Pantheon-Signature-256": signature,
+            },
+        )
+
+    assert response.status_code == 202

@@ -4,7 +4,7 @@
 > It is routinely updated at the end of significant work or sessions.  
 > A fresh Grok session should read this *after* AGENTS.md.
 
-**Last Updated**: 2026-06-29 (Phase 5 Dapr production orchestration implemented)
+**Last Updated**: 2026-06-29 (Webhook payload ingress implemented)
 
 ---
 
@@ -12,20 +12,17 @@
 Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework (MAF) to manage and coordinate Hermes Agent and OpenClaw instances running in Azure Container Apps.
 
 ## What We Are Working On Right Now
-**Branch**: `clg/phase5-production-dapr-orchestration`
+**Branch**: `clg/add-webhook-payload-ingress`
 
-- Completed phases 1-4 and merged them to `main`.
-- Started and completed Phase 5 — Production Dapr Orchestration:
-  - Added `docs/production-ai-agent-orchestrator.md` in the requested architecture/output format.
-  - Added Dapr-aware orchestrator config: Dapr sidecar port, Dapr app IDs, state store, pub/sub, and configurable route JSON.
-  - Added capability-based routing via `RouteConfig` with researcher/coder/executor/reviewer/both routes.
-  - Added `DaprAgentClient` with Dapr service invocation and direct HTTP fallback.
-  - Updated Hermes/OpenClaw clients to use Dapr service invocation when `DAPR_HTTP_PORT` is set.
-  - Added Azure OpenAI, Azure Service Bus, and Dapr component Bicep modules.
-  - Enabled Dapr on orchestrator and agent Container Apps.
-  - Added base specialized Python agent template under `agents/templates/python-agent`.
-  - Added tests for configurable routes and Dapr invocation URL generation.
-- Verification passed: orchestrator tests `9 passed, 2 warnings`; agent wrapper tests `4 passed`; `az bicep build --file infra/main.bicep` succeeded with warnings only; `docker compose config --quiet` succeeded.
+- Added a PR-based feature branch for webhook payload ingress.
+- Implemented `POST /webhooks/{source}` on the MAF orchestrator:
+  - Accepts JSON payloads from external systems.
+  - Derives event type from `X-Pantheon-Event`, `X-GitHub-Event`, or payload fields.
+  - Optionally validates HMAC-SHA256 signatures with `WEBHOOK_SHARED_SECRET`.
+  - Supports `X-Pantheon-Signature-256` and GitHub-compatible `X-Hub-Signature-256` headers.
+  - Converts the payload into an orchestration task and returns `202 Accepted` with checkpoint/agent summary.
+- Updated `.env.example`, `compose.yaml`, `docs/local-development.md`, and `docs/production-ai-agent-orchestrator.md` with webhook usage and security notes.
+- Verification passed: orchestrator tests `12 passed, 2 warnings`; agent wrapper tests `4 passed`; `az bicep build --file infra/main.bicep` succeeded with warnings only; `docker compose config --quiet` succeeded.
 
 ## Last Major Accomplishments
 - 2026-06-27: Cloned the repo + set up context & branching infrastructure.
@@ -34,10 +31,10 @@ Build the azure-ai-pantheon orchestration layer using Microsoft Agent Framework 
 - Updated LIVE_STATE and SESSION_LOG as part of the routine context process.
 
 ## Next Immediate Steps
-1. Commit and merge Phase 5 after final review.
+1. Create and merge the GitHub PR for `clg/add-webhook-payload-ingress`.
 2. Start Phase 6 on a new `clg/` branch: observability and operations.
 3. Wire OpenTelemetry export to Azure Monitor/Application Insights.
-4. Add `/health/deep` checks for Cosmos, Dapr, Hermes, OpenClaw, and Azure OpenAI config.
+4. Add `/health/deep` checks for Cosmos, Dapr, Hermes, OpenClaw, webhook config, and Azure OpenAI config.
 5. Add deployment smoke tests and runbooks.
 
 ## Current Open Questions / Risks
