@@ -50,6 +50,9 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/tasks -Body (@{prompt=
 
 # Example 3: Triggers both
 Invoke-RestMethod -Method Post -Uri http://localhost:8000/orchestrate -Body (@{prompt="Research the market and also execute the outreach plan"} | ConvertTo-Json) -ContentType "application/json"
+
+# Example 4: Receive a webhook payload and route it as an orchestration task
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/webhooks/github -Body (@{event="issue.created"; issue=@{title="Research Dapr webhook ingress"}} | ConvertTo-Json -Depth 4) -ContentType "application/json"
 ```
 
 You should see in the logs:
@@ -58,6 +61,26 @@ You should see in the logs:
 - Results from the agents
 
 The response will include the plan and execution details.
+
+## Webhook Payload Ingress
+
+The orchestrator accepts JSON payloads at:
+
+```text
+POST /webhooks/{source}
+```
+
+Examples:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri http://localhost:8000/webhooks/github `
+  -Headers @{"X-Pantheon-Event"="issue.created"} `
+  -Body (@{event="issue.created"; issue=@{title="Research Dapr webhook ingress"}} | ConvertTo-Json -Depth 4) `
+  -ContentType "application/json"
+```
+
+For signed local testing, set `WEBHOOK_SHARED_SECRET` in `.env` and send `X-Pantheon-Signature-256` or `X-Hub-Signature-256` with `sha256=<HMAC hex digest>` over the raw request body.
 
 For faster Python-only dev (without Docker):
 ```powershell

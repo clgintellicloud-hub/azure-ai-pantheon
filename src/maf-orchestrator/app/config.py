@@ -148,6 +148,10 @@ class Settings:
     # Capability routing table
     route_config_json: str = ""
 
+    # Optional shared secret for inbound webhook HMAC-SHA256 validation.
+    # SECURITY: Configure through Key Vault/app settings; never commit real values.
+    webhook_shared_secret: str = ""
+
     @property
     def route_config(self) -> RouteConfig:
         return RouteConfig.from_json(self.route_config_json)
@@ -174,6 +178,7 @@ def get_settings() -> Settings:
         cosmos_container=os.getenv("COSMOS_CONTAINER", "workflow_state"),
         use_cosmos_state=bool(os.getenv("USE_COSMOS_STATE", "false").lower() == "true") or bool(cosmos_endpoint),
         route_config_json=os.getenv("ROUTE_CONFIG_JSON", ""),
+        webhook_shared_secret=os.getenv("WEBHOOK_SHARED_SECRET", ""),
     )
 
 
